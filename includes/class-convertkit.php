@@ -66,6 +66,7 @@ class WP_ConvertKit {
 		if ( is_admin() ) {
 			add_action( 'add_meta_boxes_page', array( __CLASS__, 'add_meta_boxes' ) );
 			add_action( 'add_meta_boxes_post', array( __CLASS__, 'add_meta_boxes' ) );
+			add_action( 'add_meta_boxes_course', array( __CLASS__, 'add_meta_boxes' ) );
 		} else {
 			add_action( 'template_redirect', array( __CLASS__, 'page_takeover' ) );
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
@@ -192,33 +193,33 @@ class WP_ConvertKit {
 	 */
 	public static function append_form( $content ) {
 
-		if ( is_singular( array( 'post' ) ) || is_page() ) {
+			// if ( is_singular( array( 'post' ) ) || is_page() ) {
 
-			$attributes = self::_get_meta( get_the_ID() );
+		$attributes = self::_get_meta( get_the_ID() );
 
-			$form_id = 0;
+		$form_id = 0;
 
-			if ( isset( $attributes['form'] ) && ( 0 < $attributes['form'] ) ) {
-				$form_id = $attributes['form'];
-			} else {
-				if ( '-1' === $attributes['form'] ) {
-					$form_id = self::_get_settings( 'default_form' );
-				}
-			}
-
-			if ( 0 < $form_id ) {
-				$url = add_query_arg(
-					array(
-						'api_key' => self::_get_settings( 'api_key' ),
-						'v'       => self::$forms_version,
-					),
-					'https://forms.convertkit.com/' . $form_id . '.html'
-				);
-
-				$form_markup = self::$api->get_resource( $url );
-				$content .= $form_markup;
+		if ( isset( $attributes['form'] ) && ( 0 < $attributes['form'] ) ) {
+			$form_id = $attributes['form'];
+		} else {
+			if ( '-1' === $attributes['form'] ) {
+				$form_id = self::_get_settings( 'default_form' );
 			}
 		}
+
+		if ( 0 < $form_id ) {
+			$url = add_query_arg(
+				array(
+					'api_key' => self::_get_settings( 'api_key' ),
+					'v'       => self::$forms_version,
+				),
+				'https://forms.convertkit.com/' . $form_id . '.html'
+			);
+
+			$form_markup = self::$api->get_resource( $url );
+			$content .= $form_markup;
+		}
+		//}
 
 		return $content;
 	}
