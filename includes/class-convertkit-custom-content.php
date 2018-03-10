@@ -146,6 +146,7 @@ class ConvertKit_Custom_Content {
 	 */
 	public function register_shortcodes() {
 		add_shortcode( 'convertkit_content', array( $this, 'shortcode' ) );
+		add_shortcode( 'ck_else', array( $this, 'shortcode_ck_else' ) );
 	}
 
 	/**
@@ -156,6 +157,8 @@ class ConvertKit_Custom_Content {
 	 * @return mixed|void
 	 */
 	public static function shortcode( $attributes, $content ) {
+
+		global $ck_shortcode_block;
 
 		// The 'tag' attribute is required.
 		if ( isset( $attributes['tag'] ) ) {
@@ -186,12 +189,33 @@ class ConvertKit_Custom_Content {
 					$tags = $api->get_subscriber_tags( $subscriber_id );
 				}
 			}
+			$ck_tag_result = isset( $tags[ $tag ] );
+
+			$ck_shortcode_block = array(
+				'result' => $ck_tag_result,
+				'else'=>''
+			);
 
 			if ( isset( $tags[ $tag ] ) ) {
 				return apply_filters( 'wp_convertkit_shortcode_custom_content', $content, $attributes );
+			} else {
+				return do_shortcode( $content );
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * @param $attributes
+	 * @param $content
+	 * @return mixed|void
+	 */
+	public static function shortcode_ck_else( $attributes, $content ) {
+		global $ck_tag_result;
+
+		error_log( $content );
+
+		return $content;
 	}
 
 	/**
